@@ -1,0 +1,22 @@
+﻿<Page
+    x:Class="SimpleUWPMapApp.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SimpleUWPMapApp"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid Name="WebViewContainer">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Button x:Name="InvokeJsBtn" Grid.Row="0" Content="Invoke JavaScript function" Click="InvokeJsBtn_Click"/>
+
+        <controls:WebView2 x:Name="myWebView" Grid.Row="1" Source="https://0.0.0.0/MapApp.html"/>
+    </Grid>
+</Page>

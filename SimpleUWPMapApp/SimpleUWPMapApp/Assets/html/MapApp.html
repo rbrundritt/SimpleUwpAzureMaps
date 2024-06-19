@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title></title>
+
+    <meta charset="utf-8" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <!-- Add references to the Azure Maps Map control JavaScript and CSS files. -->
+    <link href="https://atlas.microsoft.com/sdk/javascript/mapcontrol/3/atlas.min.css" rel="stylesheet" />
+    <script src="https://atlas.microsoft.com/sdk/javascript/mapcontrol/3/atlas.min.js"></script>
+
+    <script>
+        var map, datasource;
+
+        //The base URL for accessing local files.
+        var appOriginUri = "https://0.0.0.0/";
+
+        //GeoJSON feed of all earthquakes from the past 30 days. Sourced from the USGS.
+        var earthquakeFeed = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson";
+
+        function getMap() {
+            //Initialize a map instance.
+           map = new atlas.Map('myMap', {
+                center: [-97, 39],
+                zoom: 3,
+               // style: 'grayscale_dark',
+                view: 'Auto',
+
+                //Add authentication details for connecting to Azure Maps.
+                authOptions: {
+
+                    //Alternatively, use an Azure Maps key. Get an Azure Maps key at https://azure.com/maps. NOTE: The primary key should be used as the key.
+                    authType: 'subscriptionKey',
+                    subscriptionKey: '<Your Azure Maps Key>'
+                }
+            });
+
+            //Wait until the map resources are ready.
+            map.events.add('ready', function () {
+
+                //Create an array of custom icon promises to load into the map. 
+                var iconPromises = [
+                    //NOTE: Since these images are local files, we have to use the appOriginUri to reference them.
+                    map.imageSprite.add('earthquake_icon', appOriginUri + 'icons/earthquake_icon.png'),
+                    map.imageSprite.add('warning_triangle_icon', appOriginUri + 'icons/warning_triangle_icon.png')
+                ];
+
+                //Load all the custom image icons into the map resources.
+                Promise.all(iconPromises).then(function () {
+
+                    //Create a data source and add it to the map.
+                    datasource = new atlas.source.DataSource(null, {
+                        //Tell the data source to cluster point data.
+                        cluster: true
+                    });
+                    map.sources.add(datasource);
+
+                    //Add two symbol layers to the map, one for clusters, one for individual points.
+                    map.layers.add([
+                        //Create a symbol layer to render the clusters.
+                        new atlas.layer.SymbolLayer(datasource, null, {
+                            iconOptions: {
+                                image: 'warning_triangle_icon'
+                            },
+                            textOptions: {
+                                textField: ['get', 'point_count_abbreviated'],
+                                offset: [0, -0.4]
+                            }
+                        }),
+
+                        //Create a layer to render the individual locations.
+                        new atlas.layer.SymbolLayer(datasource, null, {
+                            iconOptions: {
+                                image: 'earthquake_icon'
+                            },
+                            filter: ['!', ['has', 'point_count']] //Filter out clustered points from this layer.
+                        })
+                    ]);
+
+                    //Retrieve a GeoJSON data set and add it to the data source.
+                    datasource.importDataFromUrl(earthquakeFeed);
+                });
+            });
+        }
+
+        function setMapView(cameraOptions){
+            map.setCamera(cameraOptions);
+        }
+
+        function sendMessageToCsharp(){
+            window.chrome.webview.postMessage("Hello from JavaScript!");
+        }
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;            
+            width: 100%;
+            height: 100%;
+        }
+
+        #myMap {
+            position: relative;        
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body onload="getMap()">
+    <div id="myMap"></div>
+
+    <div style="position:absolute;top:10px;left:10px;">
+        <input type="button" value="Send Message to C#" onclick="sendMessageToCsharp()" />
+    </div>
+</body>
+</html>
