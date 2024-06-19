@@ -2,7 +2,7 @@
 
 This is a simple code sample for using Azure Maps Web SDK in a UWP app.
 
-This leverages WebView2 which has a lot more capabilties than the default WebView control in UWP (and less bugs).
+This leverages WebView2 which has a lot more capabilties than the default WebView control in UWP (and less bugs). WebView2 is available in the [Microsoft.UI.Xaml library](https://www.nuget.org/packages/Microsoft.UI.Xaml/).
 
 This sample listens for web requests to a specific domain (https://0.0.0.0) and maps them to a folder within the Assets folder of the project. This makes it easy to access these files in a similar way to them being hosted on a server. 
 
