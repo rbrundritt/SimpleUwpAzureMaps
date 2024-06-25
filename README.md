@@ -6,6 +6,8 @@ This leverages WebView2 which has a lot more capabilties than the default WebVie
 
 This sample listens for web requests to a specific domain (https://0.0.0.0) and maps them to a folder within the Assets folder of the project. This makes it easy to access these files in a similar way to them being hosted on a server. 
 
+![App screenshot](Appscreenshot.JPG)
+
 ## Running the sample
 
 **Prerequesits:**

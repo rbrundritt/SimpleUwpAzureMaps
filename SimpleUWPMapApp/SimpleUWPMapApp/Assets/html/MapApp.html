@@ -14,6 +14,10 @@
     <script>
         var map, datasource;
 
+        //Your Azure Maps key. Get an Azure Maps key at https://azure.com/maps.
+        //Consider storing this in a secure location and loading it when when calling get map.
+        var subscriptionKey = '<Your Azure Maps Key>';
+
         //The base URL for accessing local files.
         var appOriginUri = "https://0.0.0.0/";
 
@@ -30,15 +34,19 @@
 
                 //Add authentication details for connecting to Azure Maps.
                 authOptions: {
-
-                    //Alternatively, use an Azure Maps key. Get an Azure Maps key at https://azure.com/maps. NOTE: The primary key should be used as the key.
                     authType: 'subscriptionKey',
-                    subscriptionKey: '<Your Azure Maps Key>'
+                    subscriptionKey: subscriptionKey
                 }
             });
 
             //Wait until the map resources are ready.
             map.events.add('ready', function () {
+                //Add a control to allow the user to select a map style.
+                map.controls.add(new atlas.control.StyleControl({
+                    mapStyles: 'all' //Make all style options available.
+                }), {
+                    position: 'top-right'
+                });
 
                 //Create an array of custom icon promises to load into the map. 
                 var iconPromises = [
@@ -85,6 +93,42 @@
             });
         }
 
+        function search() {
+            //Get the query from the search box.
+            var query = document.getElementById('searchBox').value;
+
+            //Use the Azure Maps REST services to search for the specified location.
+            fetch(`https://atlas.microsoft.com/geocode?api-version=2023-06-01&query=${encodeURIComponent(query)}&view=Auto&subscription-key=${subscriptionKey}`)
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    if (data.features && data.features.length > 0) {
+
+                        //Get the coordinates of the first result.
+                        var coordinates = data.features[0].geometry.coordinates;
+
+                        //Do something with the coordinates of the result.
+
+                        //Get the bounding box of the result.
+                        var bounds = data.features[0].bbox;
+
+                        //Set the map view based on the bounding box of the result.
+                        //Alternatively use coordinate and a static zoom level.
+                        setMapView({
+                    bounds: bounds,
+                            padding: 40
+                        });
+                    } else {
+                        //No results found.
+                        alert('No results found.');
+                    }
+                }, function (error) {
+                    //Search request failed.
+                    alert('An error occurred while searching for the location.')
+                });
+        }
+
         function setMapView(cameraOptions){
             map.setCamera(cameraOptions);
         }
@@ -106,12 +150,26 @@
             width: 100%;
             height: 100%;
         }
+
+        .searchControl {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px;
+            background-color: white;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body onload="getMap()">
     <div id="myMap"></div>
 
-    <div style="position:absolute;top:10px;left:10px;">
+    <div class="searchControl">
+        <input type="text" id="searchBox" placeholder="Enter an address or place" />
+        <input type="button" value="Search" onclick="search()" />
+    </div>
+
+    <div style="position:absolute;top:10px;left:calc(50% - 30px);">
         <input type="button" value="Send Message to C#" onclick="sendMessageToCsharp()" />
     </div>
 </body>
