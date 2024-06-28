@@ -119,12 +119,16 @@
                     bounds: bounds,
                             padding: 40
                         });
+                    } else if(data.error) {
+                        //An error occured.
+                        alert(data.error.message);
                     } else {
                         //No results found.
                         alert('No results found.');
                     }
                 }, function (error) {
                     //Search request failed.
+                    
                     alert('An error occurred while searching for the location.')
                 });
         }
